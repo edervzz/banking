@@ -16,14 +16,19 @@ import (
 )
 
 func Run() {
-	ctx := createContext()
-	env := getEnvVars()
+	ctx, env := createContext()
 	mh := NewMigrationHandler(service.NewDefaultMigrationService(domain.NewMigrationRepositoryDB(*ctx)))
-	ch := NewCustomerHandler(service.NewCustomerServiceInterface(domain.NewCustomerRepositoryDB(*&ctx)))
+	ch := NewCustomerHandler(service.NewCustomerServiceInterface(domain.NewCustomerRepositoryDB(ctx)))
+	ah := NewAccountHandler(service.NewAccountServiceInterface(domain.NewAccountRepositoryDB(ctx)))
 
 	router := mux.NewRouter()
 	router.HandleFunc("/migrations", mh.Migrations).Methods(http.MethodPost)
 	router.HandleFunc("/customer", ch.Create).Methods(http.MethodPost)
+	router.HandleFunc("/customer/{id}", ch.Get).Methods(http.MethodGet)
+	router.HandleFunc("/account", ah.Create).Methods(http.MethodPost)
+	router.HandleFunc("/account/{id}", ah.GetBalance).Methods(http.MethodGet)
+	router.HandleFunc("/account/{id}", ah.Lock).Methods(http.MethodPost)
+	router.HandleFunc("/account/{id}", ah.Unlock).Methods(http.MethodPost)
 
 	logger.Info("listening on " + env.server + ":" + env.port)
 	if err := http.ListenAndServe(env.server+":"+env.port, router); err != nil {
@@ -86,10 +91,10 @@ func newClientDB(user string, pass string, name string) *sqlx.DB {
 }
 
 // -------------------------------------
-func createContext() *context.Context {
+func createContext() (*context.Context, *envvars) {
 	env := getEnvVars()
 	clientdb := newClientDB(env.dbUser, env.dbPass, env.dbName)
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "clientdb", clientdb)
-	return &ctx
+	return &ctx, &env
 }

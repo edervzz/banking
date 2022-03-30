@@ -1,5 +1,11 @@
 package domain
 
+const (
+	ACCT_ACTIVE = 3
+	ACCT_LOCK   = 5
+	ACCT_CLOSED = 6
+)
+
 type Account struct {
 	AccountId   int     `db:"account_id"`
 	CustomerId  int     `db:"customer_id"`
@@ -10,7 +16,8 @@ type Account struct {
 }
 
 type AccountRepository interface {
-	Create(Account) (int, error)
+	Create(*Account) (int, error)
 	GetBalance(int) (float64, error)
 	Lock(int) error
+	Unlock(int) error
 }

@@ -34,18 +34,19 @@ func (db *CustomerRepositoryDB) Create(customer *Customer) (int, error) {
 }
 
 func (db *CustomerRepositoryDB) Get(customerID int) (*Customer, error) {
-	var customer *Customer
-	err := db.client.Select(customer,
-		`SELECT id, name, city, zipcode
+	var c Customer
+	sqlRow := db.client.QueryRow(`SELECT id, name, city, zipcode
 		FROM customer
 		WHERE id = ?`,
-		customerID)
+		customerID,
+	)
+	err := sqlRow.Scan(&c.CustomerId, &c.Fullname, &c.City, &c.Zipcode)
 	if err != nil {
 		logger.Warn(err.Error())
 		return nil, err
 	}
 
-	return customer, nil
+	return &c, nil
 }
 
 // contructor

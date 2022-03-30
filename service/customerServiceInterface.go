@@ -35,6 +35,25 @@ func (d *CustomerServiceInterface) CreateCustomer(req *CustomerCreateRequest) (*
 	return &response, nil
 }
 
+func (d *CustomerServiceInterface) GetCustomer(req *CustomerGetRequest) (*CustomerGetResponse, *utils.AppMess) {
+	c, err := d.repo.Get(req.CustomerId)
+	if err != nil {
+		logger.Warn(err.Error())
+		e := &utils.AppMess{
+			Code:    http.StatusBadRequest,
+			Message: "customer not found",
+		}
+		return nil, e
+	}
+	res := CustomerGetResponse{
+		CustomerId: c.CustomerId,
+		Fullname:   c.Fullname,
+		City:       c.City,
+		Zipcode:    c.Zipcode,
+	}
+	return &res, nil
+}
+
 // constructor
 func NewCustomerServiceInterface(r domain.CustomerRepository) *CustomerServiceInterface {
 	return &CustomerServiceInterface{
