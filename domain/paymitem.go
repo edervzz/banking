@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+const (
+	PAYM_CREATED  = 1
+	PAYM_REVERSED = 2
+)
+
 type PaymItem struct {
 	DocumentId int       `db:"documentId"`
 	AccountId  int       `db:"account_id"`

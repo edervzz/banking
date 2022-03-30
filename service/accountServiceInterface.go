@@ -12,7 +12,7 @@ type AccountServiceInterface struct {
 
 func (s AccountServiceInterface) CreateAccount(req *CreateAccountRequest) (*CreateAccountResponse, *utils.AppMess) {
 	t := time.Now()
-	st := t.Format("2006-02-01 15:04:05")
+	st := t.Format("2006-01-02")
 	a := domain.Account{
 		CustomerId:  req.CustomerId,
 		OpeningDate: st,

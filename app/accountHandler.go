@@ -60,7 +60,14 @@ func (h AccountHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 func (h AccountHandler) Lock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	var req service.LockAccountRequest
-	json.NewDecoder(r.Body).Decode(&req)
+	acct, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		logger.Info("cannot read account")
+		json.NewEncoder(w).Encode("cannot read account")
+		return
+	}
+	req.AccountId = acct
 	_, appErr := h.service.LockAccount(&req)
 	if appErr != nil {
 		w.WriteHeader(appErr.Code)
@@ -75,9 +82,16 @@ func (h AccountHandler) Lock(w http.ResponseWriter, r *http.Request) {
 
 func (h AccountHandler) Unlock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
-	var req service.LockAccountRequest
-	json.NewDecoder(r.Body).Decode(&req)
-	_, appErr := h.service.LockAccount(&req)
+	var req service.UnlockAccountRequest
+	acct, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		logger.Info("cannot read account")
+		json.NewEncoder(w).Encode("cannot read account")
+		return
+	}
+	req.AccountId = acct
+	_, appErr := h.service.UnlockAccount(&req)
 	if appErr != nil {
 		w.WriteHeader(appErr.Code)
 		logger.Info(appErr.Message)

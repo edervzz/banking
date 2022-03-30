@@ -20,15 +20,20 @@ func Run() {
 	mh := NewMigrationHandler(service.NewDefaultMigrationService(domain.NewMigrationRepositoryDB(*ctx)))
 	ch := NewCustomerHandler(service.NewCustomerServiceInterface(domain.NewCustomerRepositoryDB(ctx)))
 	ah := NewAccountHandler(service.NewAccountServiceInterface(domain.NewAccountRepositoryDB(ctx)))
+	ph := NewPaymitemHandler(service.NewPaymitemServiceInterface(domain.NewPaymItemRepositoryDB(ctx)))
 
 	router := mux.NewRouter()
 	router.HandleFunc("/migrations", mh.Migrations).Methods(http.MethodPost)
+
 	router.HandleFunc("/customer", ch.Create).Methods(http.MethodPost)
 	router.HandleFunc("/customer/{id}", ch.Get).Methods(http.MethodGet)
+
 	router.HandleFunc("/account", ah.Create).Methods(http.MethodPost)
 	router.HandleFunc("/account/{id}", ah.GetBalance).Methods(http.MethodGet)
-	router.HandleFunc("/account/{id}", ah.Lock).Methods(http.MethodPost)
-	router.HandleFunc("/account/{id}", ah.Unlock).Methods(http.MethodPost)
+	router.HandleFunc("/account/lock/{id}", ah.Lock).Methods(http.MethodPost)
+	router.HandleFunc("/account/unlock/{id}", ah.Unlock).Methods(http.MethodPost)
+
+	router.HandleFunc("/paymitem", ph.Create).Methods(http.MethodPost)
 
 	logger.Info("listening on " + env.server + ":" + env.port)
 	if err := http.ListenAndServe(env.server+":"+env.port, router); err != nil {

@@ -37,11 +37,12 @@ func (db AccountRepositoryDB) Create(a *Account) (int, error) {
 
 func (db AccountRepositoryDB) GetBalance(accountId int) (float64, error) {
 	var account Account
-	err := db.client.Select(&account.Balance, `SELECT balance
+	sqlRow := db.client.QueryRow(`SELECT balance
 		FROM account
 		WHERE account_id = ?`,
 		accountId)
 
+	err := sqlRow.Scan(&account.Balance)
 	if err != nil {
 		logger.Warn(err.Error())
 		return 0, err
@@ -54,7 +55,7 @@ func (db AccountRepositoryDB) Lock(accountId int) error {
 	result, err := db.client.Exec(`UPDATE account
 		SET status = ?
 		WHERE account_id=?`,
-		5, // lock
+		ACCT_LOCK, // lock
 		accountId)
 	if err != nil {
 		logger.Warn(err.Error())

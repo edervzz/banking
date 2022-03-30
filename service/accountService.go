@@ -4,7 +4,7 @@ import "banking/utils"
 
 type CreateAccountRequest struct {
 	CustomerId  int     `json:"customerId"`
-	AccountType string  `json:"account_type"`
+	AccountType string  `json:"accountType"`
 	Balance     float64 `json:"balance"`
 }
 
