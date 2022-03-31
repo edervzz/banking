@@ -21,7 +21,7 @@ type PaymItem struct {
 }
 
 type PaymItemRepository interface {
-	Create(PaymItem) (int, error)
-	Reverse(int) error
-	GetById(int) (*PaymItem, error)
+	Create(p PaymItem) (documentId int, e error)
+	Reverse(documentId int) error
+	GetById(document int) (p *PaymItem, e error)
 }

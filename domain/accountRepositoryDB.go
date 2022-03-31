@@ -4,12 +4,10 @@ import (
 	"banking/logger"
 	"banking/utils"
 	"context"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type AccountRepositoryDB struct {
-	client *sqlx.DB
+	client SqlDB
 }
 
 func (db AccountRepositoryDB) Create(a *Account) (int, error) {

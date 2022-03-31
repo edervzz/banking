@@ -8,6 +8,6 @@ type Customer struct {
 }
 
 type CustomerRepository interface {
-	Create(*Customer) (int, error)
-	Get(int) (*Customer, error)
+	Create(customer *Customer) (customerId int, e error)
+	Get(customerId int) (customer *Customer, e error)
 }

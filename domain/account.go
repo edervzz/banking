@@ -16,8 +16,8 @@ type Account struct {
 }
 
 type AccountRepository interface {
-	Create(*Account) (int, error)
-	GetBalance(int) (float64, error)
-	Lock(int) error
-	Unlock(int) error
+	Create(account *Account) (int, error)
+	GetBalance(accountId int) (float64, error)
+	Lock(accountId int) error
+	Unlock(accountId int) error
 }

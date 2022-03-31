@@ -7,18 +7,10 @@ import (
 	"database/sql"
 	"errors"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
-// type PaymItemRepository interface {
-// 	Create(PaymItem) (int, error)
-// 	Reverse(int) error
-// 	GetById(int) (*PaymItem, error)
-// }
-
 type PaymItemRepositoryDB struct {
-	client *sqlx.DB
+	client SqlDB
 }
 
 func (db PaymItemRepositoryDB) Create(p PaymItem) (int, error) {
