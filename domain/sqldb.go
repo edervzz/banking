@@ -8,3 +8,11 @@ type SqlDB interface {
 	Select(dest interface{}, query string, args ...interface{}) error
 	Begin() (*sql.Tx, error)
 }
+type Result interface {
+	LastInsertId() (int64, error)
+	RowsAffected() (int64, error)
+}
+
+type SqlRow interface {
+	Scan(dest ...interface{}) error
+}

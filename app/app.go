@@ -21,9 +21,12 @@ func Run() {
 	ch := NewCustomerHandler(service.NewCustomerServiceInterface(domain.NewCustomerRepositoryDB(ctx)))
 	ah := NewAccountHandler(service.NewAccountServiceInterface(domain.NewAccountRepositoryDB(ctx)))
 	ph := NewPaymitemHandler(service.NewPaymitemServiceInterface(domain.NewPaymItemRepositoryDB(ctx)))
+	uh := NewUserHandler(service.NewAuthServiceInterface(domain.NewUserRepositoryDB(ctx)))
 
 	router := mux.NewRouter()
 	router.HandleFunc("/migrations", mh.Migrations).Methods(http.MethodPost)
+
+	router.HandleFunc("/register", uh.Create).Methods(http.MethodPost)
 
 	router.HandleFunc("/customer", ch.Create).Methods(http.MethodPost)
 	router.HandleFunc("/customer/{id}", ch.Get).Methods(http.MethodGet)

@@ -7,10 +7,12 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type PaymItemRepositoryDB struct {
-	client SqlDB
+	client *sqlx.DB
 }
 
 func (db PaymItemRepositoryDB) Create(p PaymItem) (int, error) {
