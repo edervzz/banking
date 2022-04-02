@@ -2,61 +2,47 @@ package service
 
 import (
 	"banking/domain"
-	"banking/utils"
-	"fmt"
-	"hash/fnv"
-	"regexp"
+	"errors"
+
+	"github.com/golang-jwt/jwt"
 )
 
+type accessTokenClaim struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+	Exp      string `json:"exp"`
+	jwt.StandardClaims
+}
 type AuthServiceInterface struct {
 	repo domain.UserRepository
 }
 
-func (s AuthServiceInterface) Register(req *RegisterRequest) (*RegisterResponse, *utils.AppMess) {
-	if req.Username == "" || req.Password == "" {
-		return &RegisterResponse{
-				Data: "must send username and password",
-			},
-			nil
-	}
-
-	err := checkPassword(req.Password)
+func (s AuthServiceInterface) Verify(routeName string, routeVars map[string]string, token string) error {
+	jwtToken, err := jwt.ParseWithClaims(
+		token,
+		&accessTokenClaim{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte("SECRET"), nil
+		})
 	if err != nil {
-		return &RegisterResponse{
-				Data: `
-			At least one upper case 
-			At least one lower case 
-			At least one digit
-			At least one special character, (?=.*?[#?!@$%^&*-])
-			Minimum eight in length 8`,
-			},
-			nil
-	}
-	h := fnv.New32a()
-	h.Write([]byte(req.Password))
-	hashedPwd := h.Sum32()
-
-	newUser := domain.User{
-		Username:       req.Username,
-		HashedPassword: string(rune(hashedPwd)),
-		Email:          req.Email,
+		return err
 	}
 
-	fmt.Println(newUser)
+	routesRoles := getRouteRoles()
 
-	err = s.repo.Create(&newUser)
-	if err != nil {
-		appMess := utils.AppMess{
-			Code:    400,
-			Message: "cannot create user",
+	claims := jwtToken.Claims.(*accessTokenClaim)
+	if routes, ok := routesRoles[claims.Role]; jwtToken.Valid && ok {
+		for _, v := range routes {
+			if v == routeName {
+				return nil
+			}
 		}
-		return nil, &appMess
+		return errors.New("wrong route-role")
 	}
 
-	return nil, nil
+	return nil
 }
-func (s AuthServiceInterface) Login(*RegisterRequest) (*RegisterResponse, *utils.AppMess)
-func (s AuthServiceInterface) Verify(*RegisterRequest) (*RegisterResponse, *utils.AppMess)
 
 // constructor
 func NewAuthServiceInterface(repo domain.UserRepository) *AuthServiceInterface {
@@ -66,11 +52,23 @@ func NewAuthServiceInterface(repo domain.UserRepository) *AuthServiceInterface {
 }
 
 // aux methods
-func checkPassword(p string) error {
-	_, err := regexp.MatchString(`^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$`, p)
-	if err != nil {
-		return err
+func getRouteRoles() (routeRoles map[string][]string) {
+	routeRoles = make(map[string][]string)
+	routeRoles["BKK010"] = []string{
+		"GetCustomer", "GetAccount",
+		"CreatePaymitem",
 	}
+	routeRoles["ADMIN"] = []string{
+		"CreateCustomer", "CreateAccount",
+		"LockAccount", "UnlockAccount",
+	}
+	return
+}
 
+func checkPassword(p string) error {
+	// _, err := regexp.MatchString(`/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$@!%&*?])[A-Za-z\d#$@!%&*?]{8,30}$/`, p)
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
