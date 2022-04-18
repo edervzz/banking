@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  mysql:
+    container_name: mysql-local
+    image: "mysql:latest"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=eder"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "db-vol:/var/lib/mysql"
+    networks:
+      - backend
+  banking:
+    environment:
+      - SERVER=mysql-local
+      - PORT=3306
+      - DB_NAME=banking
+      - DB_USER=root
+      - DB_PASS=eder
+    container_name: banking-app
+    image: banking:1.0
+    build:
+      context: .
+      dockerfile: banking.Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    command: [ "/banking-app" ]
+    expose:
+      - 8000
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  db-vol:
+    external: true

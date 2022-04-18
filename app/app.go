@@ -16,7 +16,7 @@ import (
 )
 
 func Run() {
-	ctx, env := createContext()
+	ctx, _ := createContext()
 	mh := NewMigrationHandler(service.NewDefaultMigrationService(domain.NewMigrationRepositoryDB(*ctx)))
 	ch := NewCustomerHandler(service.NewCustomerServiceInterface(domain.NewCustomerRepositoryDB(ctx)))
 	ah := NewAccountHandler(service.NewAccountServiceInterface(domain.NewAccountRepositoryDB(ctx)))
@@ -44,11 +44,51 @@ func Run() {
 
 	router.Use(auth.Authorization())
 
-	logger.Info("listening on " + env.server + ":" + env.port)
-	if err := http.ListenAndServe(env.server+":"+env.port, router); err != nil {
+	logger.Info("listening on : 8000")
+	if err := http.ListenAndServe(":8000", router); err != nil {
 		logger.Fatal(err.Error())
 	}
 
+}
+
+// -------------------------------------
+func createContext() (*context.Context, *envvars) {
+	env := getEnvVars()
+	clientdb := newClientDB(env.server, env.port, env.dbUser, env.dbPass, env.dbName)
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "clientdb", clientdb)
+	return &ctx, &env
+}
+
+// -------------------------------------
+func newClientDB(server string, port string, user string, pass string, dbName string) *sqlx.DB {
+	conn := user + ":" + pass + "@tcp(" + server + ":" + port + ")/"
+	client, err := sqlx.Open("mysql", conn)
+	err = client.Ping()
+
+	if err != nil {
+		for i := 0; i < 10; i++ {
+			time.Sleep(2 * time.Second)
+			fmt.Println("try", i+1, ":", "mysql:", conn)
+			client, err = sqlx.Open("mysql", conn)
+			err = client.Ping()
+			if err == nil {
+				break
+			}
+		}
+	}
+
+	client.SetConnMaxLifetime(time.Minute * 3)
+	client.SetMaxOpenConns(10)
+	client.SetMaxIdleConns(10)
+
+	err = client.Ping()
+	if err != nil {
+		fmt.Println("error:", err.Error())
+		os.Exit(1)
+	}
+
+	return client
 }
 
 // -------------------------------------
@@ -67,13 +107,12 @@ func getEnvVars() envvars {
 		os.Getenv("DB_USER") == "" ||
 		os.Getenv("DB_PASS") == "" {
 		return envvars{
-			server: "localhost",
-			port:   "8000",
+			server: "mysql-local",
+			port:   "3306",
 			dbName: "banking",
 			dbUser: "root",
 			dbPass: "eder",
 		}
-		//utils.Fatal("Please check environment variables")
 	}
 	return envvars{
 		server: os.Getenv("SERVER"),
@@ -82,33 +121,4 @@ func getEnvVars() envvars {
 		dbUser: os.Getenv("DB_USER"),
 		dbPass: os.Getenv("DB_PASS"),
 	}
-}
-
-// -------------------------------------
-func newClientDB(user string, pass string, name string) *sqlx.DB {
-	client, err := sqlx.Open("mysql", user+":"+pass+"@/"+name)
-	if err != nil {
-		panic(err)
-	}
-
-	client.SetConnMaxLifetime(time.Minute * 3)
-	client.SetMaxOpenConns(10)
-	client.SetMaxIdleConns(10)
-
-	err = client.Ping()
-	if err != nil {
-		fmt.Println("error:", err.Error())
-		os.Exit(1)
-	}
-
-	return client
-}
-
-// -------------------------------------
-func createContext() (*context.Context, *envvars) {
-	env := getEnvVars()
-	clientdb := newClientDB(env.dbUser, env.dbPass, env.dbName)
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, "clientdb", clientdb)
-	return &ctx, &env
 }
