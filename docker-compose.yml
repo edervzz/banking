@@ -7,7 +7,7 @@ services:
     environment:
       - "MYSQL_ROOT_PASSWORD=eder"
     ports:
-      - "3306:3306"
+      - 3306:3306
     volumes:
       - "db-vol:/var/lib/mysql"
     networks:
@@ -25,7 +25,7 @@ services:
       context: .
       dockerfile: banking.Dockerfile
     ports:
-      - "8000:8000"
+      - 8000:8000
     depends_on:
       - mysql
     command: [ "/banking-app" ]
@@ -36,6 +36,7 @@ services:
 
 networks:
   backend:
+
 
 volumes:
   db-vol:

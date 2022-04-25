@@ -107,7 +107,7 @@ func getEnvVars() envvars {
 		os.Getenv("DB_USER") == "" ||
 		os.Getenv("DB_PASS") == "" {
 		return envvars{
-			server: "mysql-local",
+			server: "localhost",
 			port:   "3306",
 			dbName: "banking",
 			dbUser: "root",
