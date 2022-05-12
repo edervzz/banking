@@ -17,7 +17,7 @@ import (
 
 func Run() {
 	ctx, _ := createContext()
-	mh := NewMigrationHandler(service.NewDefaultMigrationService(domain.NewMigrationRepositoryDB(*ctx)))
+	mh := NewMigrationHandler(service.NewDefaultMigrationService(domain.NewMigrationRepositoryDB(ctx)))
 	ch := NewCustomerHandler(service.NewCustomerServiceInterface(domain.NewCustomerRepositoryDB(ctx)))
 	ah := NewAccountHandler(service.NewAccountServiceInterface(domain.NewAccountRepositoryDB(ctx)))
 	ph := NewPaymitemHandler(service.NewPaymitemServiceInterface(domain.NewPaymItemRepositoryDB(ctx)))
@@ -48,7 +48,6 @@ func Run() {
 	if err := http.ListenAndServe(":8000", router); err != nil {
 		logger.Fatal(err.Error())
 	}
-
 }
 
 // -------------------------------------
