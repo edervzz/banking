@@ -1,5 +1,5 @@
-# banking-go
-Simple banking app
+# banking-go-docker
+Simple Banking API + go + docker + mysql + redis(soon)
 
 ## Docker
 
