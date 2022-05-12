@@ -7,5 +7,5 @@ WORKDIR /banking/build
 COPY . .
 
 RUN go mod download
-RUN go build -o /banking-app
+RUN go build -o banking-app
 

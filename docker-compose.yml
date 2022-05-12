@@ -28,7 +28,7 @@ services:
       - 8000:8000
     depends_on:
       - mysql
-    command: [ "/banking-app" ]
+    command: [ "/banking/build/banking-app" ]
     expose:
       - 8000
     networks:
@@ -40,4 +40,4 @@ networks:
 
 volumes:
   db-vol:
-    external: true
+    name: db-vol
