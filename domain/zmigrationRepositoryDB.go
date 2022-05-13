@@ -24,12 +24,11 @@ func (db MigrationRepositoryDB) Prepare() bool {
 		password varchar(100) NOT NULL,
 		email varchar(100) NOT NULL,
 		role varchar(10) NOT NULL,
-		CONSTRAINT user_PK PRIMARY KEY (userId),
+		CONSTRAINT user_PK PRIMARY KEY (user_id),
 		CONSTRAINT user_UN UNIQUE KEY (email)
 		)`)
 	if err != nil {
 		logger.Warn(err.Error())
-		return false
 	}
 
 	_, err = db.client.Exec(`CREATE TABLE banking.customer (
@@ -37,10 +36,9 @@ func (db MigrationRepositoryDB) Prepare() bool {
 		name varchar(100) NOT NULL,
 		city varchar(100) NOT NULL,
 		zipcode varchar(10) NOT NULL,
-		PRIMARY KEY (customerId)`)
+		PRIMARY KEY (customer_id))`)
 	if err != nil {
 		logger.Warn(err.Error())
-		return false
 	}
 
 	_, err = db.client.Exec(`CREATE TABLE banking.account (
@@ -53,7 +51,6 @@ func (db MigrationRepositoryDB) Prepare() bool {
 		CONSTRAINT fk_account_customer FOREIGN KEY (customer_id) REFERENCES customer(customer_id))`)
 	if err != nil {
 		logger.Warn(err.Error())
-		return false
 	}
 
 	_, err = db.client.Exec(`CREATE TABLE banking.paymitems (
@@ -71,7 +68,6 @@ func (db MigrationRepositoryDB) Prepare() bool {
 		CONSTRAINT fk_payment_account FOREIGN KEY (account_id) REFERENCES account(account_id))`)
 	if err != nil {
 		logger.Warn(err.Error())
-		return false
 	}
 
 	return true

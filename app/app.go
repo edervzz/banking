@@ -25,8 +25,7 @@ func Run() {
 	auth := NewAuthHandler(service.NewAuthServiceInterface(domain.NewUserRepositoryDB(ctx)))
 
 	router := mux.NewRouter()
-	router.HandleFunc("/migrations", mh.Migrations).
-		Methods(http.MethodPost).Name("")
+	router.HandleFunc("/migrations", mh.Migrations).Methods(http.MethodPost).Name("Migrations")
 
 	router.HandleFunc("/register", uh.Create).Methods(http.MethodPost)
 	router.HandleFunc("/login", uh.Login).Methods(http.MethodPost)
